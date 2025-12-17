@@ -15,7 +15,19 @@ proper_plot.py: This script outputs a scatter plot, comparing our method to prev
 yearly_ratios_plot,py: Enter a given year, and this will output the displacement scores and split scores for an entire year. To run, Sp_Disp_Def_Sign_date.txt must be in the same folder.<br>
 Sp_Disp_Def_Sign_date.txt: A giant array that has information for every winter day from 1960-2022.
 
-Usage:
-* Download the scripts and run them in python. Must have python and numpy downloaded to run.
-  + Download the data from Zenodo, unzip the files, and place them in the same folder as the scripts.
-  + In a command line, run "python SuPerPoV1.1.1.py" to run the file!
+# Usage:
+**Requirements**
+* Python >= 3.8
+* Numpy >= 1.20
+
+**Installation**
+* Download or clone this repo.
+* Ensure Python and NumPy are installed on your system.
+* Download the dataset from Zenodo
+* Unzip the downloaded data files and place them in the same directory as the scripts. They must be all in the same folder.
+
+**Running the Code**
+From a command line, navigate to the directory containing the scripts (and data) and run:
+```bash
+python SuPerPoV1.1.1.py
+```
