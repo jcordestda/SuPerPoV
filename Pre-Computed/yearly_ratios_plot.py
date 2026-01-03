@@ -74,12 +74,12 @@ for item in array:
       ratio_data.append(item[0])
       if item[2] < 0:
          neg_wind_dates.append(item[3])
-         NWD_D_data.append(item[0][0])
-         NWD_S_data.append(item[0][1])
+         NWD_D_data.append(item[0][0] / 100)
+         NWD_S_data.append(item[0][1] / 100)
 
 
-disp_ratios = [item[0] for item in ratio_data]
-split_ratios = [item[1] for item in ratio_data]
+disp_ratios = [(item[0 / 100) for item in ratio_data]
+split_ratios = [(item[1] / 100) for item in ratio_data]
 
 fig = plt.figure(figsize = (15,7), layout = 'constrained')
 #fig.suptitle(year)
