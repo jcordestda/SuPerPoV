@@ -29,12 +29,12 @@ for item in majors:
    temp = array[item_index: item_index + length + 1]
    temp_sharp_disp = [item[0][0] for item in temp]
    max_disp = max(temp_sharp_disp)
-   dispPoints.append(max_disp)
+   dispPoints.append(max_disp / 100)
    # Find matching split ratio
    for temp_item in temp:
       if temp_item[0][0] == max_disp:
          max_split = temp_item[0][1]
-         splitPoints.append(max_split)
+         splitPoints.append(max_split / 100)
          break
 
    if max_disp >= 20 or max_split >= 20: Twenty.append( (max_disp , max_split) )
@@ -60,8 +60,8 @@ colors = [label_to_num[label] for label in processed_labels]
 fig = plt.figure(figsize = (14,7), layout = 'constrained')
 ax = fig.add_subplot(111)
 scatter = ax.scatter(dispPoints, splitPoints, c = colors, cmap='tab10')
-ax.set_xlim(0,105)
-ax.set_ylim(0,105)
+ax.set_xlim(0,1.05)
+ax.set_ylim(0,1.05)
 ax.set_xlabel("Displacement Score")
 ax.set_ylabel("Split Score")
 
