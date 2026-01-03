@@ -1,6 +1,7 @@
 #Outputs GUI that will ask for a date. Then will ask for how many days before that date, and how many days after that date you want to collect data for
 #Both will compare the Cubical Complex and Extended Persistence
 #Version 1.1.1: Fixed file location
+#Version 1.1.2: Changed the scoring from 0-100 to 0-1
 
 #---------------------------------------------------------------------------
 # Imports
@@ -162,7 +163,7 @@ def compute_data(date):
    relfvals.sort(reverse = True, key = lambda x : x[1][0] - x[1][1])
    rel2fvals = [bar for bar in relfvals if bar[0] == 2]
    depths = [(bar[1][0] - bar[1][1]) for bar in rel2fvals]
-   split_ratio = ((rel2fvals[1][1][0] - rel2fvals[1][1][1]) / depths[0]) * 100
+   split_ratio = ((rel2fvals[1][1][0] - rel2fvals[1][1][1]) / depths[0])
    # For the shallow ratio
    reverse_depths = [(bar[1][1] - bar[1][0]) for bar in ord1fvals]
    shallow_ratio = max(reverse_depths) / max(depths) 
@@ -193,7 +194,7 @@ def compute_data(date):
    if matched == []:
       disp_ratio = 0
    else:
-      disp_ratio = ((matched[0][1][0] - matched[0][1][1]) / (matched[1][1][0] - matched[1][1][1])) * 100
+      disp_ratio = ((matched[0][1][0] - matched[0][1][1]) / (matched[1][1][0] - matched[1][1][1]))
 
    return [depths, split_ratio, disp_ratio, shallow_ratio]
 ##END CYL_COMPUTE_DATA##
@@ -394,7 +395,7 @@ except:
 split_ax = subfigs[0][1].subplots(1, 1)
 split_ax.plot(sorted_dates, split_ratios, marker = "o", linestyle = "dashed")
 split_ax.scatter(neg_wind_dates, NWD_S_data, s = 60, marker = "s", c = "red", zorder  = 3)
-split_ax.set_ylim(0,105)
+split_ax.set_ylim(0,1.05)
 split_ax.set_ylabel("Split Score")
 split_ax.tick_params(axis = 'x', labelrotation = 60)
 for label in split_ax.get_xticklabels():
@@ -412,7 +413,7 @@ if skips > 0:
 disp_ax = subfigs[1][1].subplots(1, 1)
 disp_ax.plot(sorted_dates, disp_ratios, marker = "o", linestyle = "dashed")
 disp_ax.scatter(neg_wind_dates, NWD_D_data, s = 60, marker = "s", c = "red", zorder  = 3)
-disp_ax.set_ylim(0,105)
+disp_ax.set_ylim(0,1.05)
 disp_ax.set_ylabel("Displacement Score")
 disp_ax.tick_params(axis = 'x', labelrotation = 60)
 for label in disp_ax.get_xticklabels():
@@ -426,13 +427,13 @@ if skips > 0:
       if i % skips != 0:
          label.set_visible(False)
 
-## -- Height Plot -- ##
+## -- Life Span Plot -- ##
 bar_ax = subfigs[1][0].subplots(1, 1)
 bar_ax.bar(sorted_dates, first_depths, color = "orange", label = "Largest")
 bar_ax.bar(sorted_dates, second_depths, color = "steelblue", label = "2nd Largest")
 top_depth = max(3500, max(first_depths))
 bar_ax.set_ylim(0, top_depth)
-bar_ax.set_ylabel("Height")
+bar_ax.set_ylabel("Life Span")
 bar_ax.tick_params(axis = 'x', labelrotation = 60)
 bar_ax.axhline(y = 2387.7611 + 518.5322, linestyle=':', color='black')
 bar_ax.axhline(y = 2387.7611, linestyle='--', color = 'black', label = 'Average')
