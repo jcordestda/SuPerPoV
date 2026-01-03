@@ -2,6 +2,7 @@
 #Both will compare the Cubical Complex and Extended Persistence
 #Will plot for 10hPa, 50hPa, and 100hPa
 #Version 1.0.1: Changed the average heights on the bars back to the average below 10%
+#Version 1.0.2: Changed the scoring from 0-100 to 0-1
 
 #---------------------------------------------------------------------------
 # Imports
@@ -162,7 +163,7 @@ def compute_data(date, txt_files):
    rel2fvals = [bar for bar in relfvals if bar[0] == 2]
    depths = [(bar[1][0] - bar[1][1]) for bar in rel2fvals]
    if len(rel2fvals) > 1:
-      split_ratio = ((rel2fvals[1][1][0] - rel2fvals[1][1][1]) / depths[0]) * 100
+      split_ratio = ((rel2fvals[1][1][0] - rel2fvals[1][1][1]) / depths[0])
    else:
       split_ratio = 0
    # For the shallow ratio
@@ -195,7 +196,7 @@ def compute_data(date, txt_files):
    if matched == []:
       disp_ratio = 0
    else:
-      disp_ratio = ((matched[0][1][0] - matched[0][1][1]) / (matched[1][1][0] - matched[1][1][1])) * 100
+      disp_ratio = ((matched[0][1][0] - matched[0][1][1]) / (matched[1][1][0] - matched[1][1][1]))
 
    return [depths, split_ratio, disp_ratio, shallow_ratio]
 ##END CYL_COMPUTE_DATA##
@@ -367,7 +368,7 @@ scatter_ax[0].plot(sorted_dates, split_ratios50, marker = "o", color = 'green', 
 scatter_ax[0].scatter(neg_wind_dates, NWD_S_data50, marker = "s", c = "red", zorder  = 3)
 scatter_ax[0].plot(sorted_dates, split_ratios100, marker = "o", color = 'purple', linestyle = "dashed", label = "100 hPa")
 scatter_ax[0].scatter(neg_wind_dates, NWD_S_data100, marker = "s", c = "red", zorder  = 3)
-scatter_ax[0].set_ylim(0,105)
+scatter_ax[0].set_ylim(0,1.05)
 scatter_ax[0].set_ylabel("Split Score")
 scatter_ax[0].tick_params(axis = 'x', labelrotation = 60)
 for label in scatter_ax[0].get_xticklabels():
@@ -387,7 +388,7 @@ scatter_ax[1].plot(sorted_dates, disp_ratios50, marker = "o", color = 'green', l
 scatter_ax[1].scatter(neg_wind_dates, NWD_D_data50, marker = "s", c = "red", zorder  = 3)
 scatter_ax[1].plot(sorted_dates, disp_ratios100, marker = "o", color = 'purple', linestyle = "dashed", label = "100 hPa")
 scatter_ax[1].scatter(neg_wind_dates, NWD_D_data100, marker = "s", c = "red", zorder  = 3)
-scatter_ax[1].set_ylim(0,105)
+scatter_ax[1].set_ylim(0,1.05)
 scatter_ax[1].set_ylabel("Displacement Score")
 scatter_ax[1].tick_params(axis = 'x', labelrotation = 60)
 for label in scatter_ax[1].get_xticklabels():
@@ -406,7 +407,7 @@ bar_ax[0].bar(sorted_dates, first_depths10, color = "orange", label = "Largest")
 bar_ax[0].bar(sorted_dates, second_depths10, color = "steelblue", label = "2nd Largest")
 top_depth = max(3500, max(first_depths10))
 bar_ax[0].set_ylim(0, top_depth)
-bar_ax[0].set_ylabel("Height @ 10 hPa")
+bar_ax[0].set_ylabel("Life Span @ 10 hPa")
 bar_ax[0].tick_params(axis = 'x', labelrotation = 30)
 bar_ax[0].axhline(y = 2387.7611 + 518.5322, linestyle=':', color='black')
 bar_ax[0].axhline(y = 2387.7611, linestyle='--', color = 'black', label = 'Average')
@@ -425,7 +426,7 @@ bar_ax[1].bar(sorted_dates, first_depths50, color = "orange", label = "Largest")
 bar_ax[1].bar(sorted_dates, second_depths50, color = "steelblue", label = "2nd Largest")
 top_depth = max(3500, max(first_depths50))
 bar_ax[1].set_ylim(0, top_depth)
-bar_ax[1].set_ylabel("Height @ 50 hPa")
+bar_ax[1].set_ylabel("Life Span @ 50 hPa")
 bar_ax[1].tick_params(axis = 'x', labelrotation = 30)
 bar_ax[1].legend()
 for label in bar_ax[1].get_xticklabels():
@@ -441,7 +442,7 @@ bar_ax[2].bar(sorted_dates, first_depths100, color = "orange", label = "Largest"
 bar_ax[2].bar(sorted_dates, second_depths100, color = "steelblue", label = "2nd Largest")
 top_depth = max(3500, max(first_depths100))
 bar_ax[2].set_ylim(0, top_depth)
-bar_ax[2].set_ylabel("Height @ 100 hPa")
+bar_ax[2].set_ylabel("Life Span @ 100 hPa")
 bar_ax[2].tick_params(axis = 'x', labelrotation = 30)
 bar_ax[2].legend()
 for label in bar_ax[2].get_xticklabels():
