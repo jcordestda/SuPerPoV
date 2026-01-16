@@ -7,7 +7,7 @@ This repo contains two python scripts and a folder containing two more written b
 
 __SuPerPoV1.1.1.py__: This is the main file of the project. Enter a given date, number of days before and a number of days after. The output will be 5 plots: 2 showing the shape of the vortex for the entered date, and the remaining 3 plots will describe the height, split scores, and displacement scores over the days entered.<br>
 SuPerPoV_hPa_1.0.1.py: Enter a given date, number of days before and a number of days after. The output will be 5 plots: 3 showing the heights for the vortices (one for 10 hPa, one for 50 hPa, and one for 100 hPa), and the remaining 2 plots will describe the split scores, and displacement scores over the days entered, for 10 hPa, 50 hPa, and 100 hPa.<br>
-There is a YouTube video describing the files in more detail, which can be found here: XXXXXXXXXXXXXX
+There is a YouTube video describing the files in more detail, which can be found here: (https://www.youtube.com/watch?v=Vg8sULzG_Fw)
 
 Pre-Computed:<br>
 This folder contains two python scripts and a .txt file, and it is used for the comparison with previous method and for additional statistics, but it is not needed to compute the SuPerPov scores.<br>
