@@ -1,7 +1,7 @@
 # SuPerPoV: Score and evolution of polar vortices via persistent homology
 
 The goal of this project is to provide a constant-free method to study the classification and evolution of polar vortices. The details can be found in the paper "SuPerPoV: Score and evolution of polar vortices via
-persistent homology".
+persistent homology", accessible at https://arxiv.org/pdf/2601.11386.
 
 This repo contains two python scripts and a folder containing two more written by Jake Cordes. These scripts can be used to replicate the experiments from the above paper, but, more importantly, can be used on new data for future research. The data used in the experiments are available on Zenodo, https://doi.org/10.5281/zenodo.17903131
 
