@@ -18,7 +18,7 @@ import zipfile
 import numpy as np
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 MAX_ENTRY_BYTES = 256 * 1024 * 1024
 MAX_METADATA_BYTES = 64 * 1024
 _METADATA = '__metadata__'
@@ -44,15 +44,24 @@ class DiskCache:
         return self.directory / f'{kind}-{digest}.npz'
 
     @staticmethod
-    def _metadata_bytes(metadata):
+    def _metadata_bytes(metadata, manifest=None):
         if not isinstance(metadata, dict):
             raise ValueError('Cache metadata must be a dictionary')
         envelope = {'schema_version': SCHEMA_VERSION, 'metadata': metadata}
+        if manifest is not None:
+            envelope['arrays'] = manifest
         encoded = json.dumps(envelope, sort_keys=True, separators=(',', ':'),
                              allow_nan=False).encode('utf-8')
         if len(encoded) > MAX_METADATA_BYTES:
             raise ValueError('Cache metadata is too large')
         return encoded
+
+    @staticmethod
+    def _array_integrity(array):
+        # Hash logical C-order bytes without copying the common contiguous case.
+        # The descriptor also detects same-byte dtype/shape reinterpretations.
+        return {'dtype': array.dtype.str, 'shape': list(array.shape),
+                'sha256': hashlib.sha256(np.ascontiguousarray(array)).hexdigest()}
 
     @staticmethod
     def _read_array(archive, member):
@@ -94,9 +103,13 @@ class DiskCache:
                     return None
                 # Canonical JSON distinguishes scalar types and validates the
                 # document while permitting whitespace or key-order differences.
-                actual = json.dumps(json.loads(encoded.tobytes()), sort_keys=True,
+                envelope = json.loads(encoded.tobytes())
+                if not isinstance(envelope, dict):
+                    return None
+                manifest = envelope.pop('arrays', None)
+                actual = json.dumps(envelope, sort_keys=True,
                                     separators=(',', ':'), allow_nan=False).encode('utf-8')
-                if actual != expected:
+                if actual != expected or not isinstance(manifest, dict):
                     return None
                 result = {}
                 for member in members:
@@ -105,7 +118,14 @@ class DiskCache:
                     name = member.filename[:-4]
                     if not member.filename.endswith('.npy') or not _NAME.fullmatch(name):
                         return None
-                    result[name] = self._read_array(archive, member)
+                    if name not in manifest:
+                        return None
+                    array = self._read_array(archive, member)
+                    if self._array_integrity(array) != manifest[name]:
+                        return None
+                    result[name] = array
+                if result.keys() != manifest.keys():
+                    return None
                 return result
         except (OSError, ValueError, TypeError, KeyError, EOFError, OverflowError,
                 zipfile.BadZipFile, RuntimeError):
@@ -116,7 +136,6 @@ class DiskCache:
         temporary = None
         try:
             destination = self._path(kind, key)
-            encoded = self._metadata_bytes(metadata)
             payload = {}
             for name, value in arrays.items():
                 if not isinstance(name, str) or not _NAME.fullmatch(name):
@@ -125,6 +144,12 @@ class DiskCache:
                 if array.dtype.kind not in _NUMERIC_KINDS:
                     return False
                 payload[name] = array
+            # Bound any copy needed to hash strided/Fortran arrays before hashing.
+            if (len(payload) > 64 or sum(array.nbytes + 1024 for array in payload.values())
+                    > MAX_ENTRY_BYTES):
+                return False
+            encoded = self._metadata_bytes(metadata, {
+                name: self._array_integrity(array) for name, array in payload.items()})
             payload[_METADATA] = np.frombuffer(encoded, dtype=np.uint8)
             if (len(payload) > 65 or sum(array.nbytes + 1024 for array in payload.values())
                     > MAX_ENTRY_BYTES):

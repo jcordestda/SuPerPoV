@@ -29,6 +29,23 @@ def day_frame():
 
 
 class BenchmarkGuards(unittest.TestCase):
+    def test_profile_instrumentation_tolerates_changes_before_reference_functions(self):
+        source = profile_cpu.SOURCE_PATH.read_text()
+        for prefix in ('', '# Additional GUI imports and validation\n\n' * 17):
+            with self.subTest(prefix_lines=prefix.count('\n')):
+                namespace = profile_cpu.compile_functions(prefix + source, {}, instrumented=True)
+                self.assertTrue(callable(namespace['compute_data']))
+
+    def test_profile_instrumentation_rejects_changed_reference_body(self):
+        source = profile_cpu.SOURCE_PATH.read_text()
+        # Moving the entire function is safe; inserting inside a timed stage
+        # must still fail rather than silently misattribute its statements.
+        changed = source.replace('def compute_data(date, txt_files, resolution):',
+                                 'def compute_data(date, txt_files, resolution):\n' + '\n' * 5)
+        self.assertNotEqual(changed, source)
+        with self.assertRaises(ValueError):
+            profile_cpu.compile_functions(changed, {}, instrumented=True)
+
     def test_numeric_equality_is_not_labelled_bit_exact(self):
         bars = [[(3., 1.)], [(2., 1.)]]
         result = comparison.compare((bars, comparison.scores(bars)),

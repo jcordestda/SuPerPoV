@@ -38,13 +38,18 @@ Sp_Disp_Def_Sign_date.txt: A giant array that has information for every winter d
   + Unzip the downloaded data files. The script will ask for the path to the data files you unzip, so copy and paste it once you unzip it.
 * To use your own data:
   + The script defaults to the geopotential height data having 46 latititudes (the data in the paper is all even latitudes from 0 to 90N) and 180 longitudes (the data in the paper is all even longitudes from 0 to 358). It can handle resolutions perfectly fine however, just enter in whatever the resolution is when prompted.
-  + If you want to use wind speed data, the file must be named "u1060.txt" and the there must be two columns in the wind speed data: one titled DATES and one titled SPEEDS.
+  + Wind reversal markers are optional and off by default. If enabled, the GUI first looks for `u1060.txt` in the selected data folder; if absent, it asks you to select a file. The tab-separated file must contain `DATES` (YYYY-MM-DD) and finite numeric `SPEEDS` columns. Invalid files are reported before calculations start; canceling file selection leaves the input form open.
 
 **Running the Code**
 From a command line, navigate to the directory containing the scripts (and data) and run:
 ```bash
 python SuPerPoV3.1.0.py
 ```
+
+Choose a date from November through April and nonnegative whole numbers for
+days before and after. The analysis window is clipped to November 1 through
+April 30 of that winter. For example, November 1 with two days before still
+starts on November 1, and April 29 with one day after includes April 30.
 
 ## Faster daily calculations on the CPU
 
@@ -73,8 +78,12 @@ lifetimes use GUDHI to preserve the displacement score's selection rule.
 Both the CLI and GUI store validated winter arrays and triangulations in
 `.superpov-cache` under the working directory. Later launches reuse those files.
 The cache contains numeric arrays and JSON, uses atomic writes, and invalidates
-changed inputs or relevant dependency versions. Unavailable or corrupt cache
-files are rebuilt when possible. It holds no completed scores. Each selected
+changed inputs or relevant dependency versions. Array names, shapes, types, and
+SHA-256 content digests are checked when loading. Unavailable or corrupt cache
+files are rebuilt when possible. Old cache formats are rebuilt automatically on
+the first run after upgrading; later runs reuse the new entries. Integrity checks
+run when loading a disk entry, not on every daily query using data already in
+memory. The cache holds no completed scores. Each selected
 winter uses about 12 MB at the standard resolution; disk entries remain until
 you remove the cache directory. Eight winters are retained in memory per analyzer.
 
@@ -83,7 +92,7 @@ keep preparation in memory only. The Python API defaults to in-memory caching:
 `DailyAnalyzer(cache_dir=PATH)` explicitly enables persistence across launches.
 The first query still pays for parsing, validation, and geometry preparation.
 
-For December 23, the warm daily calculation now takes **9.0 ms**, versus 78.9 ms in the GUDHI direct engine and 4.287 s in the original function. A fresh analyzer using the disk cache takes 112 ms; a complete new CLI process takes 0.309 s. The first query without a disk cache still takes 1.042 s. These are medians of three CPU runs with warm filesystem caches; only the CLI figure includes process startup and imports. Both full diagrams and scores matched the original extended calculation on all 181 supplied winter days.
+In the recorded CPU benchmark, the December 23 warm daily calculation took **9.0 ms**, versus 78.9 ms in the GUDHI direct engine and 4.287 s in the original function. A fresh analyzer using the disk cache took 112 ms; a complete new CLI process took 0.309 s. The first query without a disk cache took 1.042 s. These are medians of three CPU runs with warm filesystem caches, recorded before the cache integrity checks were added; only the CLI figure includes process startup and imports. Both full diagrams and scores matched the original extended calculation on all 181 supplied winter days.
 
 The headless command prints one JSON result per date, including the selected
 method and query time. Its query timer excludes process startup, initial module
@@ -100,4 +109,4 @@ grids ordered north-to-south and eastward. Use
 See [the benchmark documentation](benchmarks/README.md) for measured speedups,
 full-winter validation, mathematical references, reproducible commands, and
 limitations. Keep `superpov_compute.py`, `superpov_cache.py`,
-`superpov_planar.py`, and `superpov_planar.cpp` next to the main application.
+`superpov_planar.py`, `superpov_planar.cpp`, and `superpov_inputs.py` next to the main application.
