@@ -27,8 +27,8 @@ Sp_Disp_Def_Sign_date.txt: A giant array that has information for every winter d
 
 # Usage:
 **Requirements**
-* Python >= 3.8
-* Numpy >= 1.20
+* Python 3.10 with NumPy, SciPy, pandas, and GUDHI. The tested versions are in [benchmarks/requirements.txt](benchmarks/requirements.txt).
+* The graphical application also needs Matplotlib, geopy, and Tkinter.
 
 **Installation**
 * Download or clone this repo.
@@ -45,3 +45,59 @@ From a command line, navigate to the directory containing the scripts (and data)
 ```bash
 python SuPerPoV3.1.0.py
 ```
+
+## Faster daily calculations on the CPU
+
+The application shares a `DailyAnalyzer` across plotting, dates, and pressure
+levels. It reads and validates each winter once, indexes dates directly, and
+reuses the original triangulations. Daily persistence and scores are recomputed
+from the requested field each time.
+
+An optional C++ routine speeds up persistence on these planar triangulations.
+Build it once using a C++11 compiler on Linux or macOS; no GPU is needed:
+
+```bash
+python -m pip install -r benchmarks/requirements.txt
+python superpov_planar.py --build
+python superpov_compute.py --file gph_winter_1965.txt \
+  --dates 1965-12-23 1966-04-30 --pressure 10
+```
+
+The default `--method auto` selects the compiled routine when available and
+otherwise uses GUDHI. Importing or running the analyzer never launches a
+compiler. `--method planar` explicitly requires the build; `--method direct`
+uses GUDHI ordinary persistence; `--method extended` retains the original
+extended-persistence approach for numerical comparisons. Equal leading feature
+lifetimes use GUDHI to preserve the displacement score's selection rule.
+
+Both the CLI and GUI store validated winter arrays and triangulations in
+`.superpov-cache` under the working directory. Later launches reuse those files.
+The cache contains numeric arrays and JSON, uses atomic writes, and invalidates
+changed inputs or relevant dependency versions. Unavailable or corrupt cache
+files are rebuilt when possible. It holds no completed scores. Each selected
+winter uses about 12 MB at the standard resolution; disk entries remain until
+you remove the cache directory. Eight winters are retained in memory per analyzer.
+
+Use `--cache-dir PATH` to choose a CLI cache location, or `--no-disk-cache` to
+keep preparation in memory only. The Python API defaults to in-memory caching:
+`DailyAnalyzer(cache_dir=PATH)` explicitly enables persistence across launches.
+The first query still pays for parsing, validation, and geometry preparation.
+
+For December 23, the warm daily calculation now takes **9.0 ms**, versus 78.9 ms in the GUDHI direct engine and 4.287 s in the original function. A fresh analyzer using the disk cache takes 112 ms; a complete new CLI process takes 0.309 s. The first query without a disk cache still takes 1.042 s. These are medians of three CPU runs with warm filesystem caches; only the CLI figure includes process startup and imports. Both full diagrams and scores matched the original extended calculation on all 181 supplied winter days.
+
+The headless command prints one JSON result per date, including the selected
+method and query time. Its query timer excludes process startup, initial module
+imports, analyzer construction, and JSON output. Dependencies first imported
+during a query are included, so an uncached CLI query can take longer than the
+in-process benchmark with dependencies already loaded. The separate CLI
+benchmark measures the entire process.
+
+Input files must contain `# date`, `lev`, `lat`, `lon`, and `data` columns,
+one pressure level per winter file, and complete regular latitude/longitude
+grids ordered north-to-south and eastward. Use
+`--resolution LATITUDES LONGITUDES` for another resolution.
+
+See [the benchmark documentation](benchmarks/README.md) for measured speedups,
+full-winter validation, mathematical references, reproducible commands, and
+limitations. Keep `superpov_compute.py`, `superpov_cache.py`,
+`superpov_planar.py`, and `superpov_planar.cpp` next to the main application.
