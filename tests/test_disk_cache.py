@@ -113,6 +113,58 @@ class DiskCacheTests(unittest.TestCase):
         self.rewrite_entry(change)
         self.assertIsNone(self.load())
 
+    def test_altered_numeric_arrays_miss_until_replaced(self):
+        def changed_value(arrays):
+            arrays['values'][0, 0] = 99.
+
+        def renamed_array(arrays):
+            arrays['renamed'] = arrays.pop('values')
+
+        changes = {
+            'same_shape_value': changed_value,
+            'shape': lambda arrays: arrays.update(values=arrays['values'].reshape(4)),
+            'dtype': lambda arrays: arrays.update(dates=arrays['dates'].view(np.uint64)),
+            'missing': lambda arrays: arrays.pop('values'),
+            'extra': lambda arrays: arrays.update(extra=np.array([1.])),
+            'renamed': renamed_array,
+        }
+        for name, change in changes.items():
+            with self.subTest(change=name):
+                self.assertTrue(self.store())
+                self.rewrite_entry(change)
+                for _ in range(2):
+                    self.cache = cache_module.DiskCache(self.directory)
+                    self.assertIsNone(self.load())
+                self.assertTrue(self.store())
+                np.testing.assert_array_equal(self.load()['values'], self.arrays['values'])
+
+    def test_valid_legacy_entry_is_rebuilt_before_reuse(self):
+        self.assertTrue(self.store())
+        legacy = {'schema_version': 1, 'metadata': self.metadata}
+        np.savez(self.entry_path(), **self.arrays, __metadata__=np.frombuffer(
+            json.dumps(legacy).encode(), dtype=np.uint8))
+        self.assertIsNone(self.load())
+        self.assertTrue(self.store())
+        np.testing.assert_array_equal(self.load()['values'], self.arrays['values'])
+
+    def test_numeric_layouts_roundtrip_with_integrity_validation(self):
+        arrays = {
+            'fortran': np.asfortranarray(np.arange(12.).reshape(3, 4)),
+            'strided': np.arange(24, dtype=np.int32).reshape(4, 6)[:, ::2],
+            'big_endian': np.array([1, 2], dtype='>i8'),
+            'scalar': np.array(3.),
+            'empty': np.empty((2, 0)),
+            'complex': np.array([1 + 2j, 3 - 4j]),
+            'boolean': np.array([True, False]),
+        }
+        self.assertTrue(self.store(arrays=arrays))
+        loaded = self.load()
+        for name, expected in arrays.items():
+            with self.subTest(array=name):
+                np.testing.assert_array_equal(loaded[name], expected)
+                self.assertEqual(loaded[name].dtype, expected.dtype)
+                self.assertFalse(loaded[name].flags.writeable)
+
     def test_malformed_metadata_is_a_miss(self):
         self.assertTrue(self.store())
         self.rewrite_entry(lambda arrays: arrays.update(__metadata__=np.array([255], dtype=np.uint8)))

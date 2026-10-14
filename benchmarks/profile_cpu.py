@@ -32,26 +32,27 @@ from input_validation import validate_frame, validate_output_path
 
 SOURCE_PATH = Path(__file__).resolve().parents[1] / "SuPerPoV3.1.0.py"
 FUNCTION_NAMES = ("correct_df", "date_index_returner", "compute_data")
-# These ranges deliberately describe this source revision. Refuse unmapped or
-# straddling statements instead of silently attributing changed code incorrectly.
+# Offsets from compute_data's definition deliberately describe its reference
+# body. GUI edits may move the entire definition without changing attribution.
+# Refuse unmapped or straddling statements inside the body.
 STAGES = (
-    ("date_routing", 207, 214),
-    ("read_winter", 217, 217),
-    ("day_lookup", 220, 220),
-    ("extract_day", 222, 224),
-    ("polar_geometry", 227, 237),
-    ("polar_simplex_construction_and_assignment", 239, 250),
-    ("polar_make_filtration", 251, 251),
-    ("polar_extend_filtration", 252, 252),
-    ("polar_persistence", 253, 253),
-    ("polar_diagram_processing", 256, 261),
-    ("duplicate_grid_values", 264, 265),
-    ("grid_geometry", 267, 273),
-    ("grid_simplex_construction_and_assignment", 275, 286),
-    ("grid_make_filtration", 287, 287),
-    ("grid_extend_filtration", 288, 288),
-    ("grid_persistence", 289, 289),
-    ("grid_diagram_processing_and_scores", 292, 318),
+    ("date_routing", 2, 9),
+    ("read_winter", 12, 12),
+    ("day_lookup", 15, 15),
+    ("extract_day", 17, 19),
+    ("polar_geometry", 22, 32),
+    ("polar_simplex_construction_and_assignment", 34, 45),
+    ("polar_make_filtration", 46, 46),
+    ("polar_extend_filtration", 47, 47),
+    ("polar_persistence", 48, 48),
+    ("polar_diagram_processing", 51, 56),
+    ("duplicate_grid_values", 59, 60),
+    ("grid_geometry", 62, 68),
+    ("grid_simplex_construction_and_assignment", 70, 81),
+    ("grid_make_filtration", 82, 82),
+    ("grid_extend_filtration", 83, 83),
+    ("grid_persistence", 84, 84),
+    ("grid_diagram_processing_and_scores", 87, 113),
 )
 
 
@@ -85,6 +86,8 @@ def compile_functions(source_text, dependencies, instrumented=False):
         wrapped = []
         assigned = []
         for name, first_line, last_line in STAGES:
+            first_line += compute.lineno
+            last_line += compute.lineno
             statements = [
                 node for node in original_statements
                 if first_line <= node.lineno <= last_line
@@ -251,7 +254,8 @@ def main():
             "stage_timing_note": "Stage totals exclude some context/dispatch overhead and function cleanup; use uninstrumented elapsed for baseline",
             "cprofile": "One additional uninstrumented-function call per date when requested, reported separately",
         },
-        "stages": [{"name": name, "source_first_line": first, "source_last_line": last}
+        "stages": [{"name": name, "source_first_line": first + original.__code__.co_firstlineno,
+                    "source_last_line": last + original.__code__.co_firstlineno}
                    for name, first, last in STAGES],
         "runs": [],
         "cprofile_runs": [],

@@ -18,7 +18,9 @@ from scipy.spatial import Delaunay           #for triangulation
 import gudhi as gd                           #for TDA
 import geopy.distance as geod                #for distance to NP
 import tkinter as tk                         #for GUI
-from tkinter import messagebox               #for GUI
+from tkinter import filedialog, messagebox   #for GUI
+from pathlib import Path
+from superpov_inputs import read_wind_data, validate_date_window, winter_date_window
 import time
 
 #---------------------------------------------------------------------------
@@ -81,7 +83,7 @@ def ask_date_GUI():
    tk.Radiobutton(output_frame, text="Don't output", variable=output_var, value="D").pack(side="left", padx=10)
 
    # Wind Speed
-   wind_var = tk.StringVar(value="E")
+   wind_var = tk.StringVar(value="F")
    wind_frame = tk.LabelFrame(root, text="SHOW REVERSAL WIND SPEED", padx=10, pady=10)
    wind_frame.grid(row=1, column=1, padx=10, pady=10, sticky="nsew")
    tk.Radiobutton(wind_frame, text="Display wind speed reversal", variable=wind_var, value="E").pack(side="left", padx=10)
@@ -156,15 +158,35 @@ def ask_date_GUI():
        else:
           input_dict["Path"] = path_var.get().strip()
        try:
-          #DATE
-          input_dict["date"] = datetime.strptime(date, "%Y-%m-%d")
-          input_dict["daysBefore"] = int(days_B)
-          input_dict["daysAfter"] = int(days_A)
-          root.destroy()
-          root.quit()
-       except ValueError:
-          messagebox.showerror("Invalid Date", "Please enter a valid date in YYYY-MM-DD format. \nDon't leave days before or after blank. 0 is a valid entry.", parent=root)
+          selected_date, days_before, days_after = validate_date_window(date, days_B, days_A)
+       except ValueError as error:
+          messagebox.showerror("Invalid Date or Day Count", str(error), parent=root)
           entry.focus_force()
+          return
+       # Validate optional wind data while the input window is still open.
+       wind_file = None
+       wind_data = None
+       if input_dict["Wind"] == "E":
+          wind_file = Path(input_dict["Path"]) / "u1060.txt"
+          if not wind_file.is_file():
+             chosen_file = filedialog.askopenfilename(
+                parent=root, title="Select wind speed file (DATES and SPEEDS)",
+                initialdir=input_dict["Path"],
+                filetypes=[("Wind speed files", "*.txt *.tsv"), ("All files", "*")])
+             if not chosen_file:
+                messagebox.showerror("Wind File Required", "Select a wind speed file or turn off wind speed reversal display.", parent=root)
+                return
+             wind_file = Path(chosen_file)
+          try:
+             wind_data = read_wind_data(wind_file)
+          except ValueError as error:
+             messagebox.showerror("Invalid Wind File", str(error), parent=root)
+             return
+       input_dict.update(date=selected_date, daysBefore=days_before, daysAfter=days_after,
+                         WindFile=str(wind_file) if wind_file is not None else None,
+                         WindData=wind_data)
+       root.destroy()
+       root.quit()
    root.bind('<Return>', on_submit)
    tk.Button(root, text="Enter", command=on_submit).grid(row=4, column=0, columnspan=2, pady=10)
    root.mainloop()
@@ -321,44 +343,10 @@ def compute_data(date, txt_files, resolution):
 ##------------------------------------------##
 
 def n_days_prior(date, days_B):
-   test_array = []
-   nums = np.arange(days_B)
-   nums += 1
-   for num in nums:
-      if num < 10:
-         test_array.append("11-0" + str(num))
-      else:
-         test_array.append("11-" + str(num))
-   return_arr = []
-   if date[5:10] in test_array:
-      year = date[0:4]
-      for test in test_array:
-         return_arr.append(year + "-" + test)
-      return return_arr
-   else:
-      DTdate = datetime.strptime(date, "%Y-%m-%d")
-      nums = nums[::-1]
-      for num in nums:
-         return_arr.append(str((DTdate-timedelta(days=int(num))).date()))
-      return return_arr
+   return winter_date_window(date, days_B, 0)[0]
 
 def n_days_after(date, days_A):
-   test_array = []
-   nums = np.arange(1, days_A + 1)
-   large_nums = 30 - nums
-   for num in large_nums:
-      test_array.append("04-" + str(num))
-   return_arr = []
-   if date[5:10] in test_array:
-      year = date[0:4]
-      for test in test_array:
-         return_arr.append(year + "-" + test)
-      return return_arr
-   else:
-      DTdate = datetime.strptime(date, "%Y-%m-%d")
-      for num in nums:
-         return_arr.append(str((DTdate+timedelta(days=int(num))).date()))
-      return return_arr
+   return winter_date_window(date, 0, days_A)[1]
 
 #---------------------------------------------------------------------------
 # Main
@@ -554,9 +542,8 @@ NWD_S_data10 = []       #Negative Wind Dates Split data at 10 hPa
 NWD_S_data50 = []       #Negative Wind Dates Split data at 50 hPa
 NWD_S_data100 = []      #Negative Wind Dates Split data at 100 hPa
 if wind_yn == "E":
-   # Wind speeds
-   wind_file = "/Users/jakecordes/Desktop/Coding/TDAProject1/data_from_code/u1060.txt"
-   read_wind_file = pd.read_csv(wind_file, sep='\t')
+   # Reuse wind data validated before the input window closed.
+   read_wind_file = input_dict["WindData"]
    for date in sorted_dates:
       for i in range(len(read_wind_file['DATES'])):
          if date == read_wind_file['DATES'][i]:

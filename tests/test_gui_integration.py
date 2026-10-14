@@ -95,5 +95,49 @@ class GuiCacheIntegration(unittest.TestCase):
                     self.assertEqual(len(full_reads), len(selected))
 
 
+class GuiWindIntegration(unittest.TestCase):
+    def execute_wind_branch(self, enabled):
+        nodes = ast.parse(SOURCE.read_text()).body
+        start = next(index for index, node in enumerate(nodes)
+                     if isinstance(node, ast.Assign)
+                     and any(isinstance(target, ast.Name) and target.id == 'neg_wind_dates'
+                             for target in node.targets))
+        stop = next(index for index in range(start, len(nodes))
+                    if isinstance(nodes[index], ast.If)
+                    and isinstance(nodes[index].test, ast.Compare)
+                    and isinstance(nodes[index].test.left, ast.Name)
+                    and nodes[index].test.left.id == 'wind_yn')
+        namespace = {
+            'pd': pd, 'wind_yn': 'E' if enabled else 'F',
+            'sorted_dates': ['1965-11-01', '1965-11-02', '1965-11-03'],
+            'input_dict': {'WindData': pd.DataFrame({
+                'DATES': ['1965-10-31', '1965-11-01', '1965-11-02', '1965-11-03'],
+                'SPEEDS': [-1., -2., 0., 3.],
+            })},
+        }
+        namespace.update({f'{ratio}_ratios{pressure}': [.25, .5, .75] if pressure in (10, 50) else []
+                          for ratio in ('disp', 'split') for pressure in (2, 5, 10, 50, 100)})
+        with patch.object(pd, 'read_csv', side_effect=AssertionError(
+                'Plotting must reuse the wind data validated before closing the form')):
+            exec(compile(ast.Module(body=nodes[start:stop + 1], type_ignores=[]),
+                         str(SOURCE), 'exec'), namespace)
+        return namespace
+
+    def test_enabled_wind_reuses_validated_data_and_preserves_reversal_markers(self):
+        namespace = self.execute_wind_branch(True)
+        self.assertEqual(namespace['neg_wind_dates'], ['1965-11-01'])
+        for pressure in (2, 5, 10, 50, 100):
+            for prefix in ('NWD_D_data', 'NWD_S_data'):
+                self.assertEqual(namespace[f'{prefix}{pressure}'],
+                                 [.25] if pressure in (10, 50) else [])
+
+    def test_disabled_wind_has_no_markers_or_file_reads(self):
+        namespace = self.execute_wind_branch(False)
+        self.assertEqual(namespace['neg_wind_dates'], [])
+        for pressure in (2, 5, 10, 50, 100):
+            self.assertEqual(namespace[f'NWD_D_data{pressure}'], [])
+            self.assertEqual(namespace[f'NWD_S_data{pressure}'], [])
+
+
 if __name__ == '__main__':
     unittest.main()
