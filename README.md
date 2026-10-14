@@ -46,42 +46,56 @@ From a command line, navigate to the directory containing the scripts (and data)
 python SuPerPoV3.1.0.py
 ```
 
-## Faster daily calculations
+## Faster daily calculations on the CPU
 
-The application shares a `DailyAnalyzer` between the plotted field and daily
-score calculations. It reads each selected winter file once, indexes dates,
-and reuses the triangulations and simplex-tree templates across dates and
-pressure levels. Each query still computes its persistence and scores from the
-requested day's values. Changes to input files invalidate their cached data.
+The application shares a `DailyAnalyzer` across plotting, dates, and pressure
+levels. It reads and validates each winter once, indexes dates directly, and
+reuses the original triangulations. Daily persistence and scores are recomputed
+from the requested field each time.
 
-For the measured December 23 example, a complete calculation fell from 4.218 s
-to 1.089 s for the first query, and to 81.1 ms for a new date after preparation
-(3.87x and 52.0x respectively). These CPU measurements use warm filesystem
-caches and exclude Python startup and GUI rendering; see the benchmark notes
-below for all dates and verification.
-
-For a server without a graphical display, install the calculation dependencies
-and run the same engine directly:
+An optional C++ routine speeds up persistence on these planar triangulations.
+Build it once using a C++11 compiler on Linux or macOS; no GPU is needed:
 
 ```bash
 python -m pip install -r benchmarks/requirements.txt
+python superpov_planar.py --build
 python superpov_compute.py --file gph_winter_1965.txt \
   --dates 1965-12-23 1966-04-30 --pressure 10
 ```
 
-This prints one JSON result per date. The first query includes loading and
-preparation; subsequent dates in the same process reuse that work. Separate
-processes have separate caches. Imports, process startup, and JSON output are
-outside the reported query elapsed time.
+The default `--method auto` selects the compiled routine when available and
+otherwise uses GUDHI. Importing or running the analyzer never launches a
+compiler. `--method planar` explicitly requires the build; `--method direct`
+uses GUDHI ordinary persistence; `--method extended` retains the original
+extended-persistence approach for numerical comparisons. Equal leading feature
+lifetimes use GUDHI to preserve the displacement score's selection rule.
 
-The default uses ordinary H1 persistence of negated heights. Pass
-`--method extended` to retain extended persistence for numerical comparisons.
-Both methods run on the CPU. The data must have `# date`, `lev`, `lat`, `lon`,
-and `data` columns, one pressure level per winter file, and complete regular
-latitude/longitude grids ordered north-to-south and eastward. Use
+Both the CLI and GUI store validated winter arrays and triangulations in
+`.superpov-cache` under the working directory. Later launches reuse those files.
+The cache contains numeric arrays and JSON, uses atomic writes, and invalidates
+changed inputs or relevant dependency versions. Unavailable or corrupt cache
+files are rebuilt when possible. It holds no completed scores. Each selected
+winter uses about 12 MB at the standard resolution; disk entries remain until
+you remove the cache directory. Eight winters are retained in memory per analyzer.
+
+Use `--cache-dir PATH` to choose a CLI cache location, or `--no-disk-cache` to
+keep preparation in memory only. The Python API defaults to in-memory caching:
+`DailyAnalyzer(cache_dir=PATH)` explicitly enables persistence across launches.
+The first query still pays for parsing, validation, and geometry preparation.
+
+For December 23, the warm daily calculation now takes **9.0 ms**, versus 78.9 ms in the GUDHI direct engine and 4.287 s in the original function. A fresh analyzer using the disk cache takes 112 ms; a complete new CLI process takes 0.309 s. The first query without a disk cache still takes 1.042 s. These are medians of three CPU runs with warm filesystem caches; only the CLI figure includes process startup and imports. Both full diagrams and scores matched the original extended calculation on all 181 supplied winter days.
+
+The headless command prints one JSON result per date, including the selected
+method and query time. Its reported query timer excludes imports, process
+startup, and JSON output. The separate benchmark also measures actual CLI
+wall time including those costs.
+
+Input files must contain `# date`, `lev`, `lat`, `lon`, and `data` columns,
+one pressure level per winter file, and complete regular latitude/longitude
+grids ordered north-to-south and eastward. Use
 `--resolution LATITUDES LONGITUDES` for another resolution.
 
-See [the benchmark documentation](benchmarks/README.md) for complete-call
-measurements, validation, mathematical references, and the distinction between
-first-query and cached-query latency. Keep `superpov_compute.py` next to the
-main application when copying the scripts.
+See [the benchmark documentation](benchmarks/README.md) for measured speedups,
+full-winter validation, mathematical references, reproducible commands, and
+limitations. Keep `superpov_compute.py`, `superpov_cache.py`,
+`superpov_planar.py`, and `superpov_planar.cpp` next to the main application.

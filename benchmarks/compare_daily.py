@@ -44,7 +44,8 @@ def source_hashes():
     paths = [profile_cpu.SOURCE_PATH, ROOT / 'superpov_compute.py', Path(__file__),
              Path(profile_cpu.__file__), Path(persistence.__file__),
              ROOT / 'benchmarks' / 'fast_build.py',
-             ROOT / 'benchmarks' / 'input_validation.py']
+             ROOT / 'benchmarks' / 'input_validation.py', ROOT / 'superpov_cache.py',
+             ROOT / 'superpov_planar.py', ROOT / 'superpov_planar.cpp']
     return {path.name: profile_cpu.warm_file_and_hash(path) for path in paths}
 
 
@@ -163,7 +164,7 @@ def parse_args():
     parser.add_argument('--file', type=Path, required=True, help='One 46 x 180 single-pressure winter TSV')
     parser.add_argument('--dates', nargs='+', help='Timed dates; default: November 1, December 23, April 30 of 1965/66')
     parser.add_argument('--repeats', type=int, default=3)
-    parser.add_argument('--method', choices=('direct', 'extended'), default='direct',
+    parser.add_argument('--method', choices=('auto', 'planar', 'direct', 'extended'), default='direct',
                         help='Candidate persistence method; default: direct')
     parser.add_argument('--validate-all', action='store_true', help='Also compare both full diagrams on every input date')
     parser.add_argument('--validation-only', action='store_true', help='Validate every input date without timing or original-function calls')

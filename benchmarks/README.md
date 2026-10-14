@@ -5,7 +5,115 @@ and daily scores. The original `compute_data` function and its helpers remain
 unchanged as a numerical and timing reference. These tools measure complete
 calculation calls as well as the individual topology improvements.
 
-## Complete-call benchmark
+## Planar CPU backend and persistent cache
+
+`superpov_planar.cpp` computes the required features by merging components of
+an ascending dual graph. Each original triangle becomes a dual vertex born at
+its minimum height; each primal edge supplies a dual connection at the minimum
+of its two endpoint heights. Boundary edges connect to a common exterior
+component. A component born at `low` and merged at `high` gives the reflected
+bar `(high, low)`. The implementation sorts edges, uses union-find, and retains
+the strict `high - low > 1e-5` threshold in double precision.
+
+This specializes the dual-graph construction in [Obayashi, *Stable volumes for
+persistent homology*, §2.4, Algorithm 1 and Theorem E](https://link.springer.com/article/10.1007/s41468-023-00119-8)
+to these filled planar triangulations. It preserves the actual Delaunay
+triangles, including the polar center and boundary and the doubled open grid.
+Planar first homology has no field-dependent torsion, so this computation
+agrees with the existing coefficient-field-11 calculation. It is specialized
+to planar disks and does not replace a general persistent-homology library.
+The equivalence from relative extended H2 to reflected ordinary H1 is explained
+below with the SuPerPoV and persistence references.
+
+Equal maximum polar lifetimes can select different deaths under different
+stable orders. Because the displacement score matches the leading polar death,
+such days fall back to GUDHI direct persistence for the existing ordering.
+A regression fixture exercises a case where omitting this fallback changes
+displacement from zero to one. Lower lifetime ties do not change the depth list;
+equal grid lifetimes with the same death also have identical births.
+
+The optional native build is explicit and requires a C++11 compiler on Linux or
+macOS. It has no third-party native headers and uses no GPU. `--method auto`
+falls back to GUDHI when a compatible prebuilt library is unavailable. Native
+libraries live in ignored `__pycache__` and are keyed by source and platform;
+imports never start a compiler. Build failures are reported by the build command.
+
+The disk cache holds validated winter arrays, ordinal dates, pressure, and the
+original triangle arrays in uncompressed NPZ files, with JSON metadata and
+`allow_pickle=False`. Entries are atomically replaced, bounded in size, and
+checked against input identity, size, modification/change times, grid resolution,
+schema, and relevant dependency versions. Truncated or unavailable entries are
+cache misses. Each source path has one current winter entry, so revisions
+replace its previous entry; different source paths accumulate until the cache
+is removed. The standard winter plus geometry uses about 12.6 MB. Derived dual
+adjacency is rebuilt on a fresh analyzer. Neither completed results nor native
+objects are deserialized from this cache.
+
+The CLI and GUI use `.superpov-cache` by default; the API enables it only when
+`cache_dir` is supplied. NumPy is loaded at startup, but pandas, SciPy, and GUDHI
+are imported only when their work is needed. A planar disk-cache hit with a
+unique leading feature needs none of those three imports.
+
+Three repetitions per date, median wall-clock times on the same CPU host:
+
+| Date | Original call | GUDHI warm | Planar warm | Planar fresh, no disk cache | Planar fresh, disk hit | Complete CLI, disk hit |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1965-11-01 | 2.105 s | 77.1 ms | 8.53 ms | 1.055 s | 112.7 ms | 0.309 s |
+| 1965-12-23 | 4.287 s | 78.9 ms | 9.02 ms | 1.042 s | 112.5 ms | 0.309 s |
+| 1966-04-30 | 9.528 s | 79.7 ms | 9.59 ms | 1.058 s | 113.7 ms | 0.309 s |
+
+The additional warm speedup over GUDHI direct is 8.3–9.0x. For December 23,
+the planar warm call is about 475x faster than the original function, while
+a fresh analyzer reading the disk cache is about 38x faster. These ratios
+compare complete calculation calls; they exclude process startup. The CLI
+column separately includes startup and imports. Without a disk cache, parsing
+and triangulation still dominate: the first-call improvement over the previous
+direct engine is only about 3% on the December date.
+
+Creating the cache from empty took 1.093 s in one separately measured call;
+it wrote 12,577,243 bytes. This is a single setup sample, not a three-run median.
+Native compilation is a separate one-time setup step and is excluded.
+
+The [CPU reference report](results/cpu_reference_results.json) records every
+timing sample, all comparisons, input/source hashes, and environment. A separate
+validation using the same source hashes and a fresh analyzer reading the disk
+cache checked all 181 days, 362 diagrams, and 17,476 bars exactly, including
+depths, both scores, and the matched bar. Its extended reference also matched
+the actual original function on the three timed dates. Numeric equality is
+established for this winter and dependency environment; extended persistence
+can round other inputs differently, as discussed below.
+
+Reproduce the new measurements and full-diagram validation:
+
+```bash
+benchmarks/.venv/bin/python superpov_planar.py --build
+benchmarks/.venv/bin/python benchmarks/compare_cpu.py \
+  --file gph_winter_1965.txt --repeats 3 \
+  --output benchmarks/results/cpu_comparison.json
+benchmarks/.venv/bin/python benchmarks/compare_daily.py \
+  --file gph_winter_1965.txt --method planar --validation-only \
+  --output benchmarks/results/planar_validation.json
+```
+
+`compare_cpu.py` checks every repetition against the actual original function,
+including all returned depths, split, and displacement. A distinct untimed date
+prepares each warm engine. Disk-cache population is measured separately in an
+empty temporary directory; its result is also checked. The subprocess CLI case
+includes process startup, imports, cache loading, calculation, JSON output,
+process exit, and parent parsing. Other cases exclude imports and process
+startup. All use warm filesystem caches and one supplied file. Native
+compilation, GUI rendering, and wind processing are outside these measurements.
+Every input and measured source hash is checked again after timing. Larger
+archives add header/stat work during file selection.
+
+All 75 regression tests passed normally and under `python -O`, covering both
+backends, numeric cache failures/invalidation, UTF-8 BOM inputs, pressure routing,
+CLI and GUI wiring, tied feature selection, cutoff-adjacent and negative fields,
+compiler-free fallback, and benchmark verification. Native numerical tests skip
+on systems with neither a supported compiler nor a usable library; fallback
+checks still run. Recorded test runs on this Linux host had no skips.
+
+## Earlier in-memory complete-call benchmark
 
 Three repetitions per date, reporting medians for complete calculation calls:
 
@@ -47,7 +155,7 @@ Returned arrays and results can be modified without changing cached data.
 
 The GUI shares one analyzer across plotted data, selected pressures, and dates.
 Run several dates through the headless CLI in one process to get the same reuse.
-Each new process pays its own preparation cost. The benchmark measures warm
+In that earlier version each new process paid its own preparation cost. The benchmark measures warm
 filesystem caches; imports, process startup, GUI rendering, wind calculations,
 and output serialization are excluded from both reference and candidate timing.
 The recorded runs supply one input file; GUI directory discovery is excluded,
@@ -250,7 +358,7 @@ benchmarks/.venv/bin/python benchmarks/compare_persistence.py \
 
 The one-repetition whole-winter run is a correctness check; use the repeated
 three-date run for the timing comparison. Generated results are ignored by Git,
-except for the deliberately checked-in compact reference report.
+except for the deliberately checked-in reference reports.
 
 Input checks run outside the timed calculations. They reject unsupported grid
 layouts, nonfinite values, missing dates, and output paths that would overwrite

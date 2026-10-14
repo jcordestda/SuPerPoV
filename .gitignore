@@ -2,3 +2,4 @@
 /gph_winter_*.txt
 __pycache__/
 *.py[cod]
+/.superpov-cache/

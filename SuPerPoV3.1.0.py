@@ -408,7 +408,7 @@ txt_files100 = glob.glob(f"{folder_path100}/*.txt")
 
 # Share loaded winter data and geometry between the plot and daily scores.
 from superpov_compute import DailyAnalyzer
-analyzer = DailyAnalyzer(resolution=resolution)
+analyzer = DailyAnalyzer(resolution=resolution, cache_dir='.superpov-cache')
 plot_files = {2: txt_files2, 5: txt_files5, 10: txt_files10,
               50: txt_files50, 100: txt_files100}[plot_type]
 z = analyzer.get_values(date, plot_files, pressure=plot_type)

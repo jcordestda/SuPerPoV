@@ -61,6 +61,7 @@ class GuiCacheIntegration(unittest.TestCase):
                     instances = []
 
                     def create_analyzer(*args, **kwargs):
+                        kwargs['cache_dir'] = Path(directory) / f'cache-{len(selected)}'
                         analyzer = DailyAnalyzer(*args, **kwargs)
                         analyzer.get_values = Mock(wraps=analyzer.get_values)
                         analyzer.compute_data = Mock(wraps=analyzer.compute_data)

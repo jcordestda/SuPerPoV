@@ -63,7 +63,7 @@ class DailyAnalyzerTests(unittest.TestCase):
             np.testing.assert_array_equal(self.engine.get_values(date, [self.path]), self.values[index])
 
     def test_only_one_full_parse_for_different_days_and_returns_independent_arrays(self):
-        with patch.object(computation.pd, 'read_csv', wraps=pd.read_csv) as read:
+        with patch.object(pd, 'read_csv', wraps=pd.read_csv) as read:
             exposed = self.engine.get_values(DATES[0], [self.path])
             exposed[:] = -1
             np.testing.assert_array_equal(self.engine.get_values(DATES[1], [self.path]), self.values[1])
@@ -97,7 +97,7 @@ class DailyAnalyzerTests(unittest.TestCase):
     def test_winter_routing_does_not_fully_parse_unneeded_files(self):
         other = self.path.parent / 'earlier.txt'
         write_winter(other, dates=['1964-11-01', '1964-11-02', '1964-11-03'])
-        with patch.object(computation.pd, 'read_csv', wraps=pd.read_csv) as read:
+        with patch.object(pd, 'read_csv', wraps=pd.read_csv) as read:
             np.testing.assert_array_equal(self.engine.get_values(DATES[0], [other, self.path]), self.values[0])
         fully_read = [Path(call.args[0]) for call in read.call_args_list if 'nrows' not in call.kwargs]
         self.assertEqual(fully_read, [self.path])
@@ -106,7 +106,7 @@ class DailyAnalyzerTests(unittest.TestCase):
         other = self.path.parent / 'other.txt'
         write_winter(other, seed=5)
         engine = computation.DailyAnalyzer(RESOLUTION, max_cached_files=1)
-        with patch.object(computation.pd, 'read_csv', wraps=pd.read_csv) as read:
+        with patch.object(pd, 'read_csv', wraps=pd.read_csv) as read:
             for path in (self.path, other, self.path):
                 engine.get_values(DATES[0], [path])
         self.assertEqual(sum('nrows' not in call.kwargs for call in read.call_args_list), 3)
@@ -148,7 +148,7 @@ class DailyAnalyzerTests(unittest.TestCase):
 
     def test_headless_cli_outputs_scores_for_multiple_dates(self):
         command = [sys.executable, str(Path(computation.__file__)), '--file', str(self.path),
-                   '--dates', DATES[0], DATES[1], '--resolution', '4', '8', '--pressure', '10']
+                   '--no-disk-cache', '--dates', DATES[0], DATES[1], '--resolution', '4', '8', '--pressure', '10']
         result = subprocess.run(command, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         rows = [json.loads(line) for line in result.stdout.splitlines()]
