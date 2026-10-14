@@ -1,0 +1,4 @@
+# Local downloaded winter data and Python caches.
+/gph_winter_*.txt
+__pycache__/
+*.py[cod]

@@ -27,8 +27,8 @@ Sp_Disp_Def_Sign_date.txt: A giant array that has information for every winter d
 
 # Usage:
 **Requirements**
-* Python >= 3.8
-* Numpy >= 1.20
+* Python 3.10 with NumPy, SciPy, pandas, and GUDHI. The tested versions are in [benchmarks/requirements.txt](benchmarks/requirements.txt).
+* The graphical application also needs Matplotlib, geopy, and Tkinter.
 
 **Installation**
 * Download or clone this repo.
@@ -45,3 +45,43 @@ From a command line, navigate to the directory containing the scripts (and data)
 ```bash
 python SuPerPoV3.1.0.py
 ```
+
+## Faster daily calculations
+
+The application shares a `DailyAnalyzer` between the plotted field and daily
+score calculations. It reads each selected winter file once, indexes dates,
+and reuses the triangulations and simplex-tree templates across dates and
+pressure levels. Each query still computes its persistence and scores from the
+requested day's values. Changes to input files invalidate their cached data.
+
+For the measured December 23 example, a complete calculation fell from 4.218 s
+to 1.089 s for the first query, and to 81.1 ms for a new date after preparation
+(3.87x and 52.0x respectively). These CPU measurements use warm filesystem
+caches and exclude Python startup and GUI rendering; see the benchmark notes
+below for all dates and verification.
+
+For a server without a graphical display, install the calculation dependencies
+and run the same engine directly:
+
+```bash
+python -m pip install -r benchmarks/requirements.txt
+python superpov_compute.py --file gph_winter_1965.txt \
+  --dates 1965-12-23 1966-04-30 --pressure 10
+```
+
+This prints one JSON result per date. The first query includes loading and
+preparation; subsequent dates in the same process reuse that work. Separate
+processes have separate caches. Imports, process startup, and JSON output are
+outside the reported query elapsed time.
+
+The default uses ordinary H1 persistence of negated heights. Pass
+`--method extended` to retain extended persistence for numerical comparisons.
+Both methods run on the CPU. The data must have `# date`, `lev`, `lat`, `lon`,
+and `data` columns, one pressure level per winter file, and complete regular
+latitude/longitude grids ordered north-to-south and eastward. Use
+`--resolution LATITUDES LONGITUDES` for another resolution.
+
+See [the benchmark documentation](benchmarks/README.md) for complete-call
+measurements, validation, mathematical references, and the distinction between
+first-query and cached-query latency. Keep `superpov_compute.py` next to the
+main application when copying the scripts.

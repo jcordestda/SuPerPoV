@@ -1,0 +1,2582 @@
+{
+  "description": "Complete-call CPU latency and exact numerical validation of the integrated DailyAnalyzer.",
+  "metadata": {
+    "started_at_utc": "2026-10-14T02:44:25.203947+00:00",
+    "source_sha256": {
+      "SuPerPoV3.1.0.py": "8030162cb995ca4a59852e97215a9344f219fce992cf0d2cf104446de07e9081",
+      "superpov_compute.py": "2f89ea322783d0699c790c88264f37ec295a980223a6703af236cfef54c4257a",
+      "compare_daily.py": "9b55dcf00573d4de1fb0327244def47163b39b7074567a3853ecaf93de77c74e",
+      "profile_cpu.py": "f04d9f33f07bc17a0fb1de9b9baa5ddf3bac22cb7620f4d21b79a23445ed6791",
+      "compare_persistence.py": "64e081f62f22c1e921bb53fe3a3d54c978d4bdf1850293884951be44d4e06c91",
+      "fast_build.py": "989428fe1b2e0e1886b17dbea8360b89df81925e97cc1b32763d59848057fc10",
+      "input_validation.py": "03e89454ff5f0da563588cdff0d0f136e6b6f43df864a9b2252c688934ee944b"
+    },
+    "input": {
+      "name": "gph_winter_1965.txt",
+      "sha256": "e4417810a19f925bd1a61db5550a6f64eb8c92f38e195adf176f1012f024edcb",
+      "bytes": 54509422,
+      "days": 181,
+      "date_range": [
+        "1965-11-01",
+        "1966-04-30"
+      ],
+      "pressure_hpa": 10.0,
+      "resolution": [
+        46,
+        180
+      ]
+    },
+    "environment": {
+      "python": "3.10.12",
+      "platform": "Linux-6.8.0-1067-gcp-x86_64-with-glibc2.35",
+      "logical_cpu_count": 12,
+      "cpu_affinity": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "dependencies": {
+        "numpy": "2.2.6",
+        "scipy": "1.15.3",
+        "pandas": "2.3.3",
+        "gudhi": "3.13.0"
+      },
+      "thread_environment": {
+        "OMP_NUM_THREADS": null,
+        "OPENBLAS_NUM_THREADS": null,
+        "MKL_NUM_THREADS": null,
+        "NUMEXPR_NUM_THREADS": null,
+        "VECLIB_MAXIMUM_THREADS": null
+      }
+    },
+    "timed_dates": [
+      "1965-11-01",
+      "1965-12-23",
+      "1966-04-30"
+    ],
+    "timing_repeats": 3,
+    "method": "direct",
+    "finished_at_utc": "2026-10-14T02:45:33.638799+00:00"
+  },
+  "measurement_note": "Latency samples come from a separate sequential run after regression tests completed. Whole-winter validation ran separately using identical source hashes and input.",
+  "validation_run_utc": {
+    "started_at_utc": "2026-10-14T02:41:06.094501+00:00",
+    "finished_at_utc": "2026-10-14T02:43:48.156594+00:00"
+  },
+  "methodology": {
+    "timer": "time.perf_counter; wall-clock seconds",
+    "filesystem_cache": "Warm: benchmark preflight parses the input and hashing reads it before measurements; no cache flush",
+    "original": "Unmodified AST-extracted compute_data and its original file/date helpers",
+    "fresh_engine_first_query": "Constructor through first compute_data return; includes loading, validation, date indexing, geometry, templates, and daily computation",
+    "warm_engine_different_day": "Complete compute_data call after an untimed different-date query on the same analyzer; includes file fingerprint checks and daily computation",
+    "cache_scope": "New analyzer for each case and repetition; instance data and geometry caches; no result caching",
+    "order": "Rotate the start among the three timing cases by repetition index; all calls are sequential",
+    "warmup": "No topology warmup for fresh engines; preflight warms parser and filesystem cache",
+    "excluded": [
+      "dependency imports",
+      "process startup",
+      "GUI",
+      "plotting",
+      "wind data",
+      "benchmark preflight",
+      "hashing",
+      "original AST extraction",
+      "comparison checks",
+      "separate all-day validation",
+      "output serialization",
+      "analyzer destruction after returned results"
+    ],
+    "exactness": "Numeric equality of full returned lists and full sorted diagram endpoints; signed zeros compare equal",
+    "exit_requirement": "Exact numeric agreement for every timed repetition and every requested validation date",
+    "validation_only_note": "A validation-only invocation does not perform an original-function bridge or report latency"
+  },
+  "timing_runs": [
+    {
+      "date": "1965-11-01",
+      "repeat": 1,
+      "execution_order": [
+        "original",
+        "fresh_engine_first_query",
+        "warm_engine_different_day"
+      ],
+      "warmup_date": "1965-11-02",
+      "seconds": {
+        "original": 2.1769938019997426,
+        "fresh_engine_first_query": 1.0870417160003853,
+        "warm_engine_different_day": 0.07884456400006457
+      },
+      "verification": {
+        "fresh_engine_exact": true,
+        "warm_engine_exact": true,
+        "original_repeat_exact": true,
+        "passed": true
+      }
+    },
+    {
+      "date": "1965-11-01",
+      "repeat": 2,
+      "execution_order": [
+        "fresh_engine_first_query",
+        "warm_engine_different_day",
+        "original"
+      ],
+      "warmup_date": "1965-11-02",
+      "seconds": {
+        "fresh_engine_first_query": 1.0765554390000034,
+        "warm_engine_different_day": 0.0781871780000074,
+        "original": 2.1288316820000546
+      },
+      "verification": {
+        "fresh_engine_exact": true,
+        "warm_engine_exact": true,
+        "original_repeat_exact": true,
+        "passed": true
+      }
+    },
+    {
+      "date": "1965-11-01",
+      "repeat": 3,
+      "execution_order": [
+        "warm_engine_different_day",
+        "original",
+        "fresh_engine_first_query"
+      ],
+      "warmup_date": "1965-11-02",
+      "seconds": {
+        "warm_engine_different_day": 0.07932594299973061,
+        "original": 2.104952712999875,
+        "fresh_engine_first_query": 1.0859406679996937
+      },
+      "verification": {
+        "fresh_engine_exact": true,
+        "warm_engine_exact": true,
+        "original_repeat_exact": true,
+        "passed": true
+      }
+    },
+    {
+      "date": "1965-12-23",
+      "repeat": 1,
+      "execution_order": [
+        "original",
+        "fresh_engine_first_query",
+        "warm_engine_different_day"
+      ],
+      "warmup_date": "1965-11-02",
+      "seconds": {
+        "original": 4.218168489000163,
+        "fresh_engine_first_query": 1.0889777449997382,
+        "warm_engine_different_day": 0.08089875200039387
+      },
+      "verification": {
+        "fresh_engine_exact": true,
+        "warm_engine_exact": true,
+        "original_repeat_exact": true,
+        "passed": true
+      }
+    },
+    {
+      "date": "1965-12-23",
+      "repeat": 2,
+      "execution_order": [
+        "fresh_engine_first_query",
+        "warm_engine_different_day",
+        "original"
+      ],
+      "warmup_date": "1965-11-02",
+      "seconds": {
+        "fresh_engine_first_query": 1.0880556070001148,
+        "warm_engine_different_day": 0.08111943799985966,
+        "original": 4.211047782000151
+      },
+      "verification": {
+        "fresh_engine_exact": true,
+        "warm_engine_exact": true,
+        "original_repeat_exact": true,
+        "passed": true
+      }
+    },
+    {
+      "date": "1965-12-23",
+      "repeat": 3,
+      "execution_order": [
+        "warm_engine_different_day",
+        "original",
+        "fresh_engine_first_query"
+      ],
+      "warmup_date": "1965-11-02",
+      "seconds": {
+        "warm_engine_different_day": 0.08144699400054378,
+        "original": 4.2503723090003405,
+        "fresh_engine_first_query": 1.0893469029997505
+      },
+      "verification": {
+        "fresh_engine_exact": true,
+        "warm_engine_exact": true,
+        "original_repeat_exact": true,
+        "passed": true
+      }
+    },
+    {
+      "date": "1966-04-30",
+      "repeat": 1,
+      "execution_order": [
+        "original",
+        "fresh_engine_first_query",
+        "warm_engine_different_day"
+      ],
+      "warmup_date": "1965-11-02",
+      "seconds": {
+        "original": 9.285086654000224,
+        "fresh_engine_first_query": 1.0879695000003267,
+        "warm_engine_different_day": 0.0813228490005713
+      },
+      "verification": {
+        "fresh_engine_exact": true,
+        "warm_engine_exact": true,
+        "original_repeat_exact": true,
+        "passed": true
+      }
+    },
+    {
+      "date": "1966-04-30",
+      "repeat": 2,
+      "execution_order": [
+        "fresh_engine_first_query",
+        "warm_engine_different_day",
+        "original"
+      ],
+      "warmup_date": "1965-11-02",
+      "seconds": {
+        "fresh_engine_first_query": 1.070844474000296,
+        "warm_engine_different_day": 0.0809352440001021,
+        "original": 9.323875422999663
+      },
+      "verification": {
+        "fresh_engine_exact": true,
+        "warm_engine_exact": true,
+        "original_repeat_exact": true,
+        "passed": true
+      }
+    },
+    {
+      "date": "1966-04-30",
+      "repeat": 3,
+      "execution_order": [
+        "warm_engine_different_day",
+        "original",
+        "fresh_engine_first_query"
+      ],
+      "warmup_date": "1965-11-02",
+      "seconds": {
+        "warm_engine_different_day": 0.08084462900023937,
+        "original": 9.206789511999887,
+        "fresh_engine_first_query": 1.0969432399997459
+      },
+      "verification": {
+        "fresh_engine_exact": true,
+        "warm_engine_exact": true,
+        "original_repeat_exact": true,
+        "passed": true
+      }
+    }
+  ],
+  "summary_by_date": {
+    "1965-11-01": {
+      "cases": {
+        "original": {
+          "count": 3,
+          "median_seconds": 2.1288316820000546,
+          "min_seconds": 2.104952712999875,
+          "max_seconds": 2.1769938019997426
+        },
+        "fresh_engine_first_query": {
+          "count": 3,
+          "median_seconds": 1.0859406679996937,
+          "min_seconds": 1.0765554390000034,
+          "max_seconds": 1.0870417160003853
+        },
+        "warm_engine_different_day": {
+          "count": 3,
+          "median_seconds": 0.07884456400006457,
+          "min_seconds": 0.0781871780000074,
+          "max_seconds": 0.07932594299973061
+        }
+      },
+      "speedup_from_medians": {
+        "fresh_engine_first_query": 1.9603572688012225,
+        "warm_engine_different_day": 27.00036088725548
+      }
+    },
+    "1965-12-23": {
+      "cases": {
+        "original": {
+          "count": 3,
+          "median_seconds": 4.218168489000163,
+          "min_seconds": 4.211047782000151,
+          "max_seconds": 4.2503723090003405
+        },
+        "fresh_engine_first_query": {
+          "count": 3,
+          "median_seconds": 1.0889777449997382,
+          "min_seconds": 1.0880556070001148,
+          "max_seconds": 1.0893469029997505
+        },
+        "warm_engine_different_day": {
+          "count": 3,
+          "median_seconds": 0.08111943799985966,
+          "min_seconds": 0.08089875200039387,
+          "max_seconds": 0.08144699400054378
+        }
+      },
+      "speedup_from_medians": {
+        "fresh_engine_first_query": 3.873512115714704,
+        "warm_engine_different_day": 51.99947870703272
+      }
+    },
+    "1966-04-30": {
+      "cases": {
+        "original": {
+          "count": 3,
+          "median_seconds": 9.285086654000224,
+          "min_seconds": 9.206789511999887,
+          "max_seconds": 9.323875422999663
+        },
+        "fresh_engine_first_query": {
+          "count": 3,
+          "median_seconds": 1.0879695000003267,
+          "min_seconds": 1.070844474000296,
+          "max_seconds": 1.0969432399997459
+        },
+        "warm_engine_different_day": {
+          "count": 3,
+          "median_seconds": 0.0809352440001021,
+          "min_seconds": 0.08084462900023937,
+          "max_seconds": 0.0813228490005713
+        }
+      },
+      "speedup_from_medians": {
+        "fresh_engine_first_query": 8.53432624167997,
+        "warm_engine_different_day": 114.72241504564452
+      }
+    }
+  },
+  "validation": {
+    "reference": "Existing extended construction with prepared daily arrays and geometry",
+    "candidate": "DailyAnalyzer.analyze using the selected persistence method and reused caches",
+    "days": 181,
+    "diagrams": 362,
+    "bars": 17476,
+    "original_bridge": [
+      {
+        "date": "1965-11-01",
+        "extended_helper_equals_original_exactly": true
+      },
+      {
+        "date": "1965-12-23",
+        "extended_helper_equals_original_exactly": true
+      },
+      {
+        "date": "1966-04-30",
+        "extended_helper_equals_original_exactly": true
+      }
+    ],
+    "original_bridge_performed": true,
+    "passed": true,
+    "by_date": [
+      {
+        "date": "1965-11-01",
+        "bar_counts": [
+          40,
+          83
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-02",
+        "bar_counts": [
+          49,
+          98
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-03",
+        "bar_counts": [
+          50,
+          96
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-04",
+        "bar_counts": [
+          43,
+          82
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-05",
+        "bar_counts": [
+          37,
+          67
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-06",
+        "bar_counts": [
+          43,
+          82
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-07",
+        "bar_counts": [
+          45,
+          90
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-08",
+        "bar_counts": [
+          40,
+          76
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-09",
+        "bar_counts": [
+          39,
+          75
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-10",
+        "bar_counts": [
+          28,
+          51
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-11",
+        "bar_counts": [
+          20,
+          39
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-12",
+        "bar_counts": [
+          21,
+          38
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-13",
+        "bar_counts": [
+          18,
+          36
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-14",
+        "bar_counts": [
+          24,
+          47
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-15",
+        "bar_counts": [
+          28,
+          61
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-16",
+        "bar_counts": [
+          27,
+          55
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-17",
+        "bar_counts": [
+          28,
+          56
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-18",
+        "bar_counts": [
+          21,
+          46
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-19",
+        "bar_counts": [
+          22,
+          43
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-20",
+        "bar_counts": [
+          19,
+          36
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-21",
+        "bar_counts": [
+          26,
+          49
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-22",
+        "bar_counts": [
+          27,
+          46
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-23",
+        "bar_counts": [
+          28,
+          55
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-24",
+        "bar_counts": [
+          29,
+          55
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-25",
+        "bar_counts": [
+          24,
+          46
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-26",
+        "bar_counts": [
+          26,
+          49
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-27",
+        "bar_counts": [
+          26,
+          41
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-28",
+        "bar_counts": [
+          22,
+          38
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-29",
+        "bar_counts": [
+          22,
+          42
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-11-30",
+        "bar_counts": [
+          18,
+          35
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-01",
+        "bar_counts": [
+          32,
+          60
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-02",
+        "bar_counts": [
+          17,
+          34
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-03",
+        "bar_counts": [
+          24,
+          53
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-04",
+        "bar_counts": [
+          24,
+          54
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-05",
+        "bar_counts": [
+          19,
+          39
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-06",
+        "bar_counts": [
+          18,
+          32
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-07",
+        "bar_counts": [
+          24,
+          48
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-08",
+        "bar_counts": [
+          16,
+          36
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-09",
+        "bar_counts": [
+          19,
+          37
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-10",
+        "bar_counts": [
+          12,
+          24
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-11",
+        "bar_counts": [
+          12,
+          21
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-12",
+        "bar_counts": [
+          16,
+          30
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-13",
+        "bar_counts": [
+          15,
+          34
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-14",
+        "bar_counts": [
+          28,
+          51
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-15",
+        "bar_counts": [
+          19,
+          41
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-16",
+        "bar_counts": [
+          19,
+          37
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-17",
+        "bar_counts": [
+          16,
+          33
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-18",
+        "bar_counts": [
+          14,
+          30
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-19",
+        "bar_counts": [
+          14,
+          29
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-20",
+        "bar_counts": [
+          19,
+          41
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-21",
+        "bar_counts": [
+          11,
+          25
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-22",
+        "bar_counts": [
+          16,
+          30
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-23",
+        "bar_counts": [
+          27,
+          51
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-24",
+        "bar_counts": [
+          24,
+          50
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-25",
+        "bar_counts": [
+          17,
+          36
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-26",
+        "bar_counts": [
+          27,
+          45
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-27",
+        "bar_counts": [
+          19,
+          37
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-28",
+        "bar_counts": [
+          20,
+          44
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-29",
+        "bar_counts": [
+          27,
+          54
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-30",
+        "bar_counts": [
+          25,
+          48
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1965-12-31",
+        "bar_counts": [
+          22,
+          40
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-01",
+        "bar_counts": [
+          29,
+          62
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-02",
+        "bar_counts": [
+          28,
+          48
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-03",
+        "bar_counts": [
+          34,
+          68
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-04",
+        "bar_counts": [
+          49,
+          89
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-05",
+        "bar_counts": [
+          36,
+          79
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-06",
+        "bar_counts": [
+          26,
+          52
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-07",
+        "bar_counts": [
+          26,
+          50
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-08",
+        "bar_counts": [
+          29,
+          61
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-09",
+        "bar_counts": [
+          37,
+          65
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-10",
+        "bar_counts": [
+          39,
+          71
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-11",
+        "bar_counts": [
+          42,
+          87
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-12",
+        "bar_counts": [
+          34,
+          56
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-13",
+        "bar_counts": [
+          32,
+          62
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-14",
+        "bar_counts": [
+          40,
+          83
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-15",
+        "bar_counts": [
+          38,
+          79
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-16",
+        "bar_counts": [
+          39,
+          85
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-17",
+        "bar_counts": [
+          30,
+          55
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-18",
+        "bar_counts": [
+          24,
+          52
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-19",
+        "bar_counts": [
+          22,
+          44
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-20",
+        "bar_counts": [
+          22,
+          44
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-21",
+        "bar_counts": [
+          25,
+          57
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-22",
+        "bar_counts": [
+          23,
+          42
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-23",
+        "bar_counts": [
+          22,
+          46
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-24",
+        "bar_counts": [
+          26,
+          59
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-25",
+        "bar_counts": [
+          38,
+          74
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-26",
+        "bar_counts": [
+          19,
+          43
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-27",
+        "bar_counts": [
+          28,
+          50
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-28",
+        "bar_counts": [
+          50,
+          95
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-29",
+        "bar_counts": [
+          30,
+          59
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-30",
+        "bar_counts": [
+          32,
+          60
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-01-31",
+        "bar_counts": [
+          25,
+          48
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-01",
+        "bar_counts": [
+          33,
+          63
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-02",
+        "bar_counts": [
+          29,
+          55
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-03",
+        "bar_counts": [
+          32,
+          60
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-04",
+        "bar_counts": [
+          27,
+          65
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-05",
+        "bar_counts": [
+          43,
+          87
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-06",
+        "bar_counts": [
+          27,
+          56
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-07",
+        "bar_counts": [
+          16,
+          35
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-08",
+        "bar_counts": [
+          20,
+          43
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-09",
+        "bar_counts": [
+          34,
+          66
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-10",
+        "bar_counts": [
+          42,
+          93
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-11",
+        "bar_counts": [
+          40,
+          71
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-12",
+        "bar_counts": [
+          41,
+          84
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-13",
+        "bar_counts": [
+          39,
+          76
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-14",
+        "bar_counts": [
+          43,
+          89
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-15",
+        "bar_counts": [
+          52,
+          108
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-16",
+        "bar_counts": [
+          38,
+          80
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-17",
+        "bar_counts": [
+          41,
+          87
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-18",
+        "bar_counts": [
+          33,
+          56
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-19",
+        "bar_counts": [
+          36,
+          68
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-20",
+        "bar_counts": [
+          41,
+          85
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-21",
+        "bar_counts": [
+          25,
+          51
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-22",
+        "bar_counts": [
+          26,
+          51
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-23",
+        "bar_counts": [
+          22,
+          49
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-24",
+        "bar_counts": [
+          26,
+          50
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-25",
+        "bar_counts": [
+          20,
+          44
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-26",
+        "bar_counts": [
+          24,
+          44
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-27",
+        "bar_counts": [
+          22,
+          38
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-02-28",
+        "bar_counts": [
+          20,
+          44
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-01",
+        "bar_counts": [
+          23,
+          51
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-02",
+        "bar_counts": [
+          31,
+          57
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-03",
+        "bar_counts": [
+          35,
+          61
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-04",
+        "bar_counts": [
+          27,
+          53
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-05",
+        "bar_counts": [
+          36,
+          74
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-06",
+        "bar_counts": [
+          32,
+          69
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-07",
+        "bar_counts": [
+          42,
+          87
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-08",
+        "bar_counts": [
+          24,
+          42
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-09",
+        "bar_counts": [
+          28,
+          56
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-10",
+        "bar_counts": [
+          32,
+          66
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-11",
+        "bar_counts": [
+          40,
+          82
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-12",
+        "bar_counts": [
+          40,
+          79
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-13",
+        "bar_counts": [
+          45,
+          88
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-14",
+        "bar_counts": [
+          55,
+          97
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-15",
+        "bar_counts": [
+          46,
+          91
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-16",
+        "bar_counts": [
+          41,
+          85
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-17",
+        "bar_counts": [
+          60,
+          121
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-18",
+        "bar_counts": [
+          44,
+          92
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-19",
+        "bar_counts": [
+          53,
+          99
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-20",
+        "bar_counts": [
+          39,
+          78
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-21",
+        "bar_counts": [
+          42,
+          79
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-22",
+        "bar_counts": [
+          48,
+          97
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-23",
+        "bar_counts": [
+          42,
+          90
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-24",
+        "bar_counts": [
+          37,
+          77
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-25",
+        "bar_counts": [
+          34,
+          70
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-26",
+        "bar_counts": [
+          36,
+          71
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-27",
+        "bar_counts": [
+          38,
+          68
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-28",
+        "bar_counts": [
+          44,
+          94
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-29",
+        "bar_counts": [
+          40,
+          79
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-30",
+        "bar_counts": [
+          43,
+          75
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-03-31",
+        "bar_counts": [
+          51,
+          92
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-01",
+        "bar_counts": [
+          38,
+          76
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-02",
+        "bar_counts": [
+          44,
+          80
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-03",
+        "bar_counts": [
+          38,
+          77
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-04",
+        "bar_counts": [
+          44,
+          84
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-05",
+        "bar_counts": [
+          40,
+          77
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-06",
+        "bar_counts": [
+          44,
+          88
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-07",
+        "bar_counts": [
+          48,
+          89
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-08",
+        "bar_counts": [
+          46,
+          87
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-09",
+        "bar_counts": [
+          25,
+          52
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-10",
+        "bar_counts": [
+          43,
+          86
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-11",
+        "bar_counts": [
+          30,
+          56
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-12",
+        "bar_counts": [
+          35,
+          75
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-13",
+        "bar_counts": [
+          40,
+          81
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-14",
+        "bar_counts": [
+          44,
+          92
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-15",
+        "bar_counts": [
+          38,
+          79
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-16",
+        "bar_counts": [
+          49,
+          96
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-17",
+        "bar_counts": [
+          49,
+          90
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-18",
+        "bar_counts": [
+          42,
+          91
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-19",
+        "bar_counts": [
+          53,
+          105
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-20",
+        "bar_counts": [
+          44,
+          89
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-21",
+        "bar_counts": [
+          40,
+          77
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-22",
+        "bar_counts": [
+          43,
+          85
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-23",
+        "bar_counts": [
+          50,
+          99
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-24",
+        "bar_counts": [
+          55,
+          102
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-25",
+        "bar_counts": [
+          32,
+          71
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-26",
+        "bar_counts": [
+          40,
+          78
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-27",
+        "bar_counts": [
+          40,
+          78
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-28",
+        "bar_counts": [
+          49,
+          95
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-29",
+        "bar_counts": [
+          44,
+          86
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      },
+      {
+        "date": "1966-04-30",
+        "bar_counts": [
+          47,
+          105
+        ],
+        "diagram_exact": true,
+        "depths_list_exact": true,
+        "scores_and_matched_bar_exact": true,
+        "maximum_endpoint_error": 0.0,
+        "maximum_depth_error": 0.0
+      }
+    ]
+  },
+  "verification": {
+    "timing": {
+      "requirement": "exact_numeric",
+      "input_unchanged": true,
+      "passed": true
+    },
+    "validation": {
+      "requirement": "exact_numeric",
+      "input_unchanged": true,
+      "passed": true
+    }
+  }
+}

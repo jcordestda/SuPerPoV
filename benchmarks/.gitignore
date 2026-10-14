@@ -2,3 +2,4 @@ __pycache__/
 .venv/
 results/*
 !results/reference_results.json
+!results/daily_reference_results.json

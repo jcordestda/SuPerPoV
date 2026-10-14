@@ -1,9 +1,75 @@
-# Profiling and a faster persistence prototype
+# Daily calculation caching and persistence benchmarks
 
-These standalone tools measure the current daily calculation and evaluate a
-faster way to obtain its persistence results. The existing application remains
-the reference implementation; this contribution does not change its GUI or
-default computation.
+The application now uses `superpov_compute.DailyAnalyzer` for its plotted field
+and daily scores. The original `compute_data` function and its helpers remain
+unchanged as a numerical and timing reference. These tools measure complete
+calculation calls as well as the individual topology improvements.
+
+## Complete-call benchmark
+
+Three repetitions per date, reporting medians for complete calculation calls:
+
+| Date | Original | First query, fresh analyzer | New date, cached analyzer | First-query speedup | Cached-query speedup |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 1965-11-01 | 2.129 s | 1.086 s | 78.8 ms | 1.96x | 27.0x |
+| 1965-12-23 | 4.218 s | 1.089 s | 81.1 ms | 3.87x | 52.0x |
+| 1966-04-30 | 9.285 s | 1.088 s | 80.9 ms | 8.53x | 114.7x |
+
+The later-date reference calls spend longer scanning rows; indexed access removes
+that growth. For the December example, first-query elapsed time fell by about 74%
+and cached-query time by about 98%. All measurements are CPU calculations.
+These are complete calculation-call timings, not measurements of GUI rendering
+or launching a new Python process.
+
+The integrated engine also passed exact checks on all 181 days: 362 diagrams,
+17,476 positive-persistence bars, complete ordered depth lists, both scores,
+and the selected matching bar. Maximum observed endpoint and depth error was
+zero. Both timed candidates matched the original function on every repetition.
+The [reference report](results/daily_reference_results.json) contains source and
+input hashes, raw repeated timings, the timing boundaries, and per-day checks.
+Timing was collected separately after the regression suites completed; the
+whole-winter validation used identical source hashes and input.
+
+`compare_daily.py` measures the original calculation, the first query on a fresh
+analyzer, and a different-date query after the analyzer has prepared another day.
+The fresh-query timer includes analyzer construction, file selection/header checks, parsing,
+input validation, date indexing, triangulation, template preparation, and scores.
+The cached-query timer includes file fingerprint checks and a new persistence
+calculation. Completed daily results are never cached.
+
+Only the requested winter files are fully parsed; other candidate files need a
+one-row header probe. Date lookup then uses a dictionary and a NumPy slice.
+Each analyzer retains at most eight winter arrays (about 96 MB of height values
+at this resolution for eight 181-day winters), plus its fixed geometry templates
+and bounded header metadata. It releases parsed dataframes. File identity, size,
+modification time, and change time determine whether a file needs to be reloaded.
+Returned arrays and results can be modified without changing cached data.
+
+The GUI shares one analyzer across plotted data, selected pressures, and dates.
+Run several dates through the headless CLI in one process to get the same reuse.
+Each new process pays its own preparation cost. The benchmark measures warm
+filesystem caches; imports, process startup, GUI rendering, wind calculations,
+and output serialization are excluded from both reference and candidate timing.
+The recorded runs supply one input file; GUI directory discovery is excluded,
+and selecting a winter from a larger archive adds header and file-stat work.
+
+```bash
+benchmarks/.venv/bin/python benchmarks/compare_daily.py \
+  --file gph_winter_1965.txt --repeats 3 --validate-all
+```
+
+Every timed output must exactly equal the original function's complete result.
+The all-day check compares both full diagrams and all score details against
+the existing extended construction, and checks that this reference reproduces
+the original function on the timed dates. `--validation-only` skips timing and
+the original-function bridge; `--method extended` selects the extended candidate.
+
+Input validation rejects unsupported grid layouts and mixed pressure levels.
+It supports missing calendar days and the final date in a partial winter when
+that date is present; these cases previously failed in the scanning date helper.
+The GUI's date-window helpers and wind-data path are outside this change.
+
+## Earlier topology-only experiment
 
 On the supplied 1965–1966 winter, reusing the fixed simplex structure and
 computing ordinary persistence on negated heights reduced the time for both
@@ -132,9 +198,10 @@ The 54.5 MB input and generated profiler binaries are not included.
 
 Exact agreement on this winter is not a proof of bitwise agreement on every
 input or GUDHI version. GUDHI documents possible rounding during the scaling
-used by extended persistence. Other resolutions, pressure levels, tied values,
-or different triangulations deserve their own numerical checks before adopting
-the prototype as the default implementation.
+used by extended persistence. Direct persistence is now the default. Other
+resolutions, pressure levels, tied values, dependency versions, or triangulations
+deserve their own numerical checks; exact equality on them is not assumed.
+Use `--method extended` in the headless CLI or daily benchmark for comparisons.
 
 The current source is the reference for this comparison. Its April 30
 displacement score already differs slightly from the repository's historical
@@ -195,5 +262,13 @@ exit. Validation remains enabled with `python -O`.
 Run the focused regression checks with:
 
 ```bash
+benchmarks/.venv/bin/python -m unittest discover -s tests -p 'test_*.py'
 benchmarks/.venv/bin/python -m unittest discover -s benchmarks -p 'test_*.py'
 ```
+
+The application tests exercise cache invalidation, bounded file retention,
+pressure isolation, shared plotting/calculation reads, CLI output, and agreement
+with the original calculation on small fields. The benchmark tests verify that
+fresh timers include construction, cached queries use a different seed date,
+every repetition is checked, and full grid diagrams are compared even when
+scores happen to agree. Both suites also run with `python -O`.

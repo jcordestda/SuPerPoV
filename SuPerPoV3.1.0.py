@@ -406,29 +406,13 @@ txt_files10 = glob.glob(f"{folder_path10}/*.txt")
 txt_files50 = glob.glob(f"{folder_path50}/*.txt")
 txt_files100 = glob.glob(f"{folder_path100}/*.txt")
 
-# Grab the year and month
-date_year = date[0:4]
-date_month = date[5:7]
-
-# Is 11-01 in the same year as the date given? Or is it in the year before?
-if date_month in ["11","12"]:
-   date_year_agree = True
-else:
-   date_year_agree = False
-
-# Grab the right Data Frame for the given year
-if plot_type == 2: df = correct_df(txt_files2, date_year, date_year_agree)
-elif plot_type == 5: df = correct_df(txt_files5, date_year, date_year_agree)
-elif plot_type == 10: df = correct_df(txt_files10, date_year, date_year_agree)
-elif plot_type == 50: df = correct_df(txt_files50, date_year, date_year_agree)
-elif plot_type == 100: df = correct_df(txt_files100, date_year, date_year_agree)
-
-# Reduce to the given day
-date_l_index, date_u_index = date_index_returner(df, resolution, date)
-
-z = np.array([])
-for i in range(date_l_index, date_u_index): z = np.append(z, df["data"][i])
-Z = z.reshape(resolution)												#--FLAG
+# Share loaded winter data and geometry between the plot and daily scores.
+from superpov_compute import DailyAnalyzer
+analyzer = DailyAnalyzer(resolution=resolution)
+plot_files = {2: txt_files2, 5: txt_files5, 10: txt_files10,
+              50: txt_files50, 100: txt_files100}[plot_type]
+z = analyzer.get_values(date, plot_files, pressure=plot_type)
+Z = z.reshape(resolution)
 
 #------------------------
 # Cylindrical Plot
@@ -496,15 +480,15 @@ all_data50 = []
 all_data100 = []
 for date in sorted_dates:
    if 2 in pressures:
-      all_data2.append(compute_data(date, txt_files2, resolution))
+      all_data2.append(analyzer.compute_data(date, txt_files2, pressure=2))
    if 5 in pressures:
-      all_data5.append(compute_data(date, txt_files5, resolution))
+      all_data5.append(analyzer.compute_data(date, txt_files5, pressure=5))
    if 10 in pressures:
-      all_data10.append(compute_data(date, txt_files10, resolution))
+      all_data10.append(analyzer.compute_data(date, txt_files10, pressure=10))
    if 50 in pressures:
-      all_data50.append(compute_data(date, txt_files50, resolution))
+      all_data50.append(analyzer.compute_data(date, txt_files50, pressure=50))
    if 100 in pressures:
-      all_data100.append(compute_data(date, txt_files100, resolution))
+      all_data100.append(analyzer.compute_data(date, txt_files100, pressure=100))
 all_depths2 = [item[0] for item in all_data2]
 first_depths2 = [depth[0] for depth in all_depths2]
 second_depths2 = [depth[1] if len(depth) > 1 else 0 for depth in all_depths2]
