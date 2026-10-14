@@ -86,9 +86,11 @@ The first query still pays for parsing, validation, and geometry preparation.
 For December 23, the warm daily calculation now takes **9.0 ms**, versus 78.9 ms in the GUDHI direct engine and 4.287 s in the original function. A fresh analyzer using the disk cache takes 112 ms; a complete new CLI process takes 0.309 s. The first query without a disk cache still takes 1.042 s. These are medians of three CPU runs with warm filesystem caches; only the CLI figure includes process startup and imports. Both full diagrams and scores matched the original extended calculation on all 181 supplied winter days.
 
 The headless command prints one JSON result per date, including the selected
-method and query time. Its reported query timer excludes imports, process
-startup, and JSON output. The separate benchmark also measures actual CLI
-wall time including those costs.
+method and query time. Its query timer excludes process startup, initial module
+imports, analyzer construction, and JSON output. Dependencies first imported
+during a query are included, so an uncached CLI query can take longer than the
+in-process benchmark with dependencies already loaded. The separate CLI
+benchmark measures the entire process.
 
 Input files must contain `# date`, `lev`, `lat`, `lon`, and `data` columns,
 one pressure level per winter file, and complete regular latitude/longitude
